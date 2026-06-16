@@ -6,10 +6,10 @@ const { fileURLToPath } = require('url');
 const isDev = process.argv.includes('--dev') || !app.isPackaged;
 const frontendDir = isDev
   ? path.resolve(__dirname, '..', 'app')
-  : path.join(process.resourcesPath, 'app');
+  : path.join(process.resourcesPath, 'frontend', 'app');
 const vendorDir = isDev
   ? path.join(__dirname, 'node_modules', 'lucide', 'dist', 'umd')
-  : path.join(process.resourcesPath, 'vendor', 'lucide');
+  : path.join(process.resourcesPath, 'frontend', 'vendor', 'lucide');
 const routeFiles = new Map([
   ['/', 'index.html'],
   ['/camp', 'camp.html'],

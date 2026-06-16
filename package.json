@@ -28,11 +28,11 @@
     "extraResources": [
       {
         "from": "../app",
-        "to": "app"
+        "to": "frontend/app"
       },
       {
         "from": "node_modules/lucide/dist/umd",
-        "to": "vendor/lucide"
+        "to": "frontend/vendor/lucide"
       }
     ],
     "win": {

@@ -8,7 +8,7 @@ Remote:
 git remote add origin https://github.com/amongdemons-com/steam
 ```
 
-The shared frontend source comes from `../app`. For development, Electron loads `../app/index.html` directly. For production packaging, Electron Builder includes `../app` in the packaged app resources at build time, so there is no persistent copied frontend folder in this repo.
+The shared frontend source comes from `../app`. For development, Electron loads `../app/index.html` directly. For production packaging, Electron Builder includes `../app` in the packaged app resources under `resources/frontend/app` at build time, so there is no persistent copied frontend folder in this repo.
 
 The browser website keeps using relative API calls under `/api`. This Steam wrapper resolves those same frontend API calls to `https://amongdemons.com/api`.
 
