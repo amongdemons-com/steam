@@ -1,0 +1,42 @@
+{
+  "name": "@amongdemons/steam",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Electron Steam wrapper for Among Demons.",
+  "main": "main.js",
+  "scripts": {
+    "steam:dev": "electron . --dev",
+    "steam:prepare": "node scripts/check-shared-assets.js",
+    "steam:build:win": "npm run steam:prepare && electron-builder --win"
+  },
+  "devDependencies": {
+    "electron": "^42.4.0",
+    "electron-builder": "^26.0.12",
+    "lucide": "^1.16.0"
+  },
+  "build": {
+    "appId": "com.amongdemons.steam",
+    "productName": "Among Demons",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "main.js",
+      "preload.js",
+      "package.json"
+    ],
+    "extraResources": [
+      {
+        "from": "../app",
+        "to": "app"
+      },
+      {
+        "from": "node_modules/lucide/dist/umd",
+        "to": "vendor/lucide"
+      }
+    ],
+    "win": {
+      "target": "nsis"
+    }
+  }
+}

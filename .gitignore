@@ -1,0 +1,8 @@
+node_modules/
+
+# Packaged builds
+dist/
+out/
+
+# Local files
+*.log
