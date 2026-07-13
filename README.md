@@ -1,6 +1,6 @@
 # Among Demons
 
-A minimal Electron app that opens [amongdemons.com](https://amongdemons.com/) in a fullscreen desktop window.
+A minimal Electron app that opens [amongdemons.com/camp](https://amongdemons.com/camp) in a fullscreen desktop window. Press Escape to open the Steam-only exit confirmation.
 
 ## Run locally
 

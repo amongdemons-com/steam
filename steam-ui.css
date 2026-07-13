@@ -1,0 +1,129 @@
+#among-demons-steam-exit[hidden] {
+  display: none !important;
+}
+
+#among-demons-steam-exit {
+  position: fixed;
+  inset: 0;
+  z-index: 2147483647;
+  display: grid;
+  place-items: center;
+  padding: 1rem;
+  color: var(--ad-text, #eef8f5);
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+#among-demons-steam-exit .steam-exit-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(2, 7, 9, 0.8);
+  backdrop-filter: blur(6px);
+}
+
+#among-demons-steam-exit .steam-exit-panel {
+  position: relative;
+  width: min(100%, 32rem);
+  overflow: hidden;
+  border: 1px solid var(--ad-border-strong, rgba(161, 212, 201, 0.28));
+  border-top: 4px solid var(--ad-ember, #e78a55);
+  border-radius: var(--ad-radius, 6px);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.04), transparent 45%),
+    var(--ad-surface, rgba(13, 25, 29, 0.98));
+  box-shadow: 0 28px 80px rgba(0, 0, 0, 0.68), 0 0 30px rgba(231, 138, 85, 0.12);
+}
+
+#among-demons-steam-exit .steam-exit-header {
+  padding: 1.5rem;
+}
+
+#among-demons-steam-exit .steam-exit-eyebrow {
+  display: block;
+  margin-bottom: 0.45rem;
+  color: var(--ad-gold, #e8c76a);
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+#among-demons-steam-exit h2 {
+  margin: 0;
+  color: var(--ad-text, #eef8f5);
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(1.45rem, 4vw, 1.85rem);
+  font-weight: 900;
+  line-height: 1.1;
+}
+
+#among-demons-steam-exit p {
+  margin: 0.7rem 0 0;
+  color: var(--ad-muted, #9fb6b2);
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+#among-demons-steam-exit .steam-exit-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.7rem;
+  padding: 1rem 1.5rem;
+  border-top: 1px solid var(--ad-border, rgba(161, 212, 201, 0.16));
+  background: rgba(3, 9, 11, 0.32);
+}
+
+#among-demons-steam-exit .steam-exit-button {
+  min-width: 8.5rem;
+  min-height: 2.65rem;
+  border-radius: var(--ad-radius, 6px);
+  font-weight: 700;
+}
+
+#among-demons-steam-exit .steam-exit-continue {
+  border-color: rgba(161, 212, 201, 0.26);
+  background:
+    linear-gradient(180deg, rgba(161, 212, 201, 0.08), rgba(3, 9, 11, 0.22)),
+    rgba(3, 9, 11, 0.54);
+  color: rgba(220, 232, 229, 0.9);
+}
+
+#among-demons-steam-exit .steam-exit-confirm {
+  border-color: rgba(226, 80, 65, 0.62);
+  background:
+    linear-gradient(180deg, rgba(226, 80, 65, 0.26), rgba(80, 12, 10, 0.22)),
+    rgba(42, 10, 10, 0.86);
+  color: #fff2f0;
+  box-shadow: 0 0 16px rgba(226, 80, 65, 0.14);
+}
+
+#among-demons-steam-exit .steam-exit-button:focus-visible {
+  outline: 3px solid rgba(111, 214, 189, 0.34);
+  outline-offset: 2px;
+}
+
+#among-demons-steam-exit .steam-exit-continue:not(:disabled):hover {
+  border-color: rgba(161, 212, 201, 0.46);
+  background:
+    linear-gradient(180deg, rgba(161, 212, 201, 0.14), rgba(3, 9, 11, 0.24)),
+    rgba(13, 29, 32, 0.74);
+  color: #f2f7f5;
+}
+
+#among-demons-steam-exit .steam-exit-confirm:not(:disabled):hover {
+  border-color: rgba(255, 127, 111, 0.8);
+  background:
+    linear-gradient(180deg, rgba(255, 127, 111, 0.34), rgba(80, 12, 10, 0.28)),
+    rgba(66, 14, 12, 0.78);
+  color: #fff;
+}
+
+@media (max-width: 32rem) {
+  #among-demons-steam-exit .steam-exit-actions {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+
+  #among-demons-steam-exit .steam-exit-button {
+    width: 100%;
+  }
+}
