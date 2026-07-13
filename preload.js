@@ -4,7 +4,10 @@ const SHOW_EXIT_DIALOG_CHANNEL = 'steam:show-exit-dialog';
 const EXIT_GAME_CHANNEL = 'steam:exit-game';
 const GET_AUTH_TICKET_CHANNEL = 'steam:get-auth-ticket';
 const UNLOCK_ACHIEVEMENT_CHANNEL = 'steam:unlock-achievement';
+const SHOW_LOADER_CHANNEL = 'steam:show-loader';
+const HIDE_LOADER_CHANNEL = 'steam:hide-loader';
 const MODAL_ID = 'among-demons-steam-exit';
+const LOADER_ID = 'among-demons-steam-loader';
 
 contextBridge.exposeInMainWorld('steamBridge', {
   isSteam: true,
@@ -105,7 +108,29 @@ function keepFocusInsideDialog(event) {
   }
 }
 
+let loader = null;
+
+function showLoader() {
+  if (!document.body) return;
+
+  if (!loader) {
+    loader = document.createElement('div');
+    loader.id = LOADER_ID;
+    loader.setAttribute('aria-hidden', 'true');
+    loader.innerHTML = '<div class="steam-loader-spinner"></div>';
+    document.body.appendChild(loader);
+  }
+
+  loader.hidden = false;
+}
+
+function hideLoader() {
+  if (loader) loader.hidden = true;
+}
+
 ipcRenderer.on(SHOW_EXIT_DIALOG_CHANNEL, showExitDialog);
+ipcRenderer.on(SHOW_LOADER_CHANNEL, showLoader);
+ipcRenderer.on(HIDE_LOADER_CHANNEL, hideLoader);
 
 if (document.readyState === 'loading') {
   window.addEventListener('DOMContentLoaded', createExitDialog, { once: true });

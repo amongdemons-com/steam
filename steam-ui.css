@@ -10,6 +10,46 @@ body,
   display: none;
 }
 
+#among-demons-steam-loader[hidden] {
+  display: none !important;
+}
+
+#among-demons-steam-loader {
+  position: fixed;
+  inset: 0;
+  z-index: 2147483646;
+  display: grid;
+  place-items: center;
+  background: rgba(2, 7, 9, 0.55);
+  backdrop-filter: blur(3px);
+  /* Delay the fade-in so fast navigations never flash the spinner. Toggling
+     [hidden] restarts the animation, so re-shows get the delay too. */
+  opacity: 0;
+  animation: steam-loader-fade 0.2s ease-out 0.25s forwards;
+}
+
+#among-demons-steam-loader .steam-loader-spinner {
+  width: 3rem;
+  height: 3rem;
+  border: 3px solid rgba(161, 212, 201, 0.18);
+  border-top-color: rgba(111, 214, 189, 0.9);
+  border-radius: 50%;
+  box-shadow: 0 0 24px rgba(111, 214, 189, 0.15);
+  animation: steam-loader-spin 0.8s linear infinite;
+}
+
+@keyframes steam-loader-fade {
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes steam-loader-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 #among-demons-steam-exit[hidden] {
   display: none !important;
 }

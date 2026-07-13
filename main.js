@@ -9,6 +9,8 @@ const SHOW_EXIT_DIALOG_CHANNEL = 'steam:show-exit-dialog';
 const EXIT_GAME_CHANNEL = 'steam:exit-game';
 const GET_AUTH_TICKET_CHANNEL = 'steam:get-auth-ticket';
 const UNLOCK_ACHIEVEMENT_CHANNEL = 'steam:unlock-achievement';
+const SHOW_LOADER_CHANNEL = 'steam:show-loader';
+const HIDE_LOADER_CHANNEL = 'steam:hide-loader';
 const STEAM_UI_CSS = fs.readFileSync(path.join(__dirname, 'steam-ui.css'), 'utf8');
 
 // TODO: replace with the real Among Demons app id once Steamworks verification
@@ -17,10 +19,61 @@ const STEAM_APP_ID = 480;
 // Identity label echoed by the backend when validating tickets with
 // ISteamUserAuth/AuthenticateUserTicket.
 const AUTH_TICKET_IDENTITY = 'amongdemons';
-// Only these API names may be unlocked from the page. ACH_WIN_ONE_GAME is a
-// Spacewar test achievement; replace with the real list from Steamworks.
+// Only these API names may be unlocked from the page. Mirrors
+// public/api/data/achievements.json in the website repo (steamName fields);
+// ACH_WIN_ONE_GAME is kept for Spacewar (app 480) testing.
 const ACHIEVEMENT_NAMES = new Set([
-  'ACH_WIN_ONE_GAME'
+  'ACH_WIN_ONE_GAME',
+  'ACH_MARKED_BY_THE_DARK',
+  'ACH_BLOODED_HUNTER',
+  'ACH_VETERAN_OF_ASH',
+  'ACH_BEYOND_MORTAL',
+  'ACH_ENDLESS_HUNGER',
+  'ACH_FIRST_BLOOD',
+  'ACH_PACTBOUND',
+  'ACH_FRESH_BLOOD',
+  'ACH_SIX_DEEP',
+  'ACH_A_WAY_OUT',
+  'ACH_TRIAL_OF_THE_FEW',
+  'ACH_CALL_FROM_CAMP',
+  'ACH_TERROR_BEGINS',
+  'ACH_BELOW_THE_WORLD',
+  'ACH_THERE_IS_NO_BOTTOM',
+  'ACH_SOULFORGED',
+  'ACH_RELENTLESS',
+  'ACH_MYTH_MADE_FLESH',
+  'ACH_EVERY_SHADE_OF_SIN',
+  'ACH_ELEVENFOLD',
+  'ACH_COMPLETE_BLOODLINE',
+  'ACH_HALF_THE_MENAGERIE',
+  'ACH_AMONG_DEMONS',
+  'ACH_PERFECT_VESSEL',
+  'ACH_ANCHORED',
+  'ACH_ROAD_LESS_TRAVELLED',
+  'ACH_DEATH_HAS_AN_ADDRESS',
+  'ACH_HUNTERS_GROUND',
+  'ACH_THE_LONG_HUNT',
+  'ACH_VESSEL_BRIMMING',
+  'ACH_THROUGH_DARKNESS',
+  'ACH_FAR_FROM_THE_FIRE',
+  'ACH_EDGEWALKER',
+  'ACH_ASHES_REMEMBER',
+  'ACH_HOLD_THE_LINE',
+  'ACH_BLIND_THE_VOID',
+  'ACH_ROT_THE_ROOT',
+  'ACH_CURTAIN_CALL',
+  'ACH_IRON_BREAKS',
+  'ACH_HEARD_THE_WHISPER',
+  'ACH_THE_LINE_HOLDS',
+  'ACH_WAKE_THE_KING',
+  'ACH_MOVE_THE_MOUNTAIN',
+  'ACH_CUT_THE_THREAD',
+  'ACH_STILL_THE_STORM',
+  'ACH_CROWN_OF_RUIN',
+  'ACH_HUNTER_HUNTED',
+  'ACH_BLOOD_RIVALRY',
+  'ACH_APEX_PREDATOR',
+  'ACH_UNTOUCHABLE'
 ]);
 
 let mainWindow = null;
@@ -83,6 +136,21 @@ function createWindow() {
     void mainWindow.webContents.insertCSS(STEAM_UI_CSS);
   });
 
+  // Show a loading overlay on the current page while the next document is
+  // fetched. On success the overlay dies with the old document; it only needs
+  // an explicit hide when the navigation never commits.
+  mainWindow.webContents.on('did-start-navigation', (details) => {
+    if (!details.isMainFrame || details.isSameDocument) return;
+
+    mainWindow.webContents.send(SHOW_LOADER_CHANNEL);
+  });
+
+  mainWindow.webContents.on('did-fail-load', (event, errorCode, errorDescription, url, isMainFrame) => {
+    if (!isMainFrame) return;
+
+    mainWindow.webContents.send(HIDE_LOADER_CHANNEL);
+  });
+
   mainWindow.webContents.on('before-input-event', (event, input) => {
     if (input.type !== 'keyDown' || input.key !== 'Escape' || input.isAutoRepeat) return;
 
@@ -104,6 +172,7 @@ function createWindow() {
     if (isAmongDemonsUrl(url)) return;
 
     event.preventDefault();
+    mainWindow.webContents.send(HIDE_LOADER_CHANNEL);
     openExternalUrl(url);
   });
 
