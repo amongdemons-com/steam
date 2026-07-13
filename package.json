@@ -29,6 +29,9 @@
       "assets/icon.png",
       "package.json"
     ],
+    "asarUnpack": [
+      "**/node_modules/steamworks.js/**"
+    ],
     "win": {
       "icon": "assets/icon.ico",
       "target": [
@@ -47,5 +50,8 @@
       "createStartMenuShortcut": true,
       "shortcutName": "Among Demons"
     }
+  },
+  "dependencies": {
+    "steamworks.js": "^0.4.0"
   }
 }

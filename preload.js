@@ -1,8 +1,16 @@
-const { ipcRenderer } = require('electron');
+const { contextBridge, ipcRenderer } = require('electron');
 
 const SHOW_EXIT_DIALOG_CHANNEL = 'steam:show-exit-dialog';
 const EXIT_GAME_CHANNEL = 'steam:exit-game';
+const GET_AUTH_TICKET_CHANNEL = 'steam:get-auth-ticket';
+const UNLOCK_ACHIEVEMENT_CHANNEL = 'steam:unlock-achievement';
 const MODAL_ID = 'among-demons-steam-exit';
+
+contextBridge.exposeInMainWorld('steamBridge', {
+  isSteam: true,
+  getAuthTicket: () => ipcRenderer.invoke(GET_AUTH_TICKET_CHANNEL),
+  unlockAchievement: (name) => ipcRenderer.invoke(UNLOCK_ACHIEVEMENT_CHANNEL, String(name))
+});
 
 let modal = null;
 let continueButton = null;
