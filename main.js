@@ -1,8 +1,12 @@
-const { app, BrowserWindow, Menu, shell } = require('electron');
+const { app, BrowserWindow, Menu, ipcMain, shell } = require('electron');
+const fs = require('fs');
 const path = require('path');
 
-const APP_URL = 'https://amongdemons.com/';
+const APP_URL = 'https://amongdemons.com/camp';
 const APP_HOST = new URL(APP_URL).hostname;
+const SHOW_EXIT_DIALOG_CHANNEL = 'steam:show-exit-dialog';
+const EXIT_GAME_CHANNEL = 'steam:exit-game';
+const STEAM_UI_CSS = fs.readFileSync(path.join(__dirname, 'steam-ui.css'), 'utf8');
 
 let mainWindow = null;
 
@@ -34,11 +38,12 @@ function createWindow() {
     fullscreen: true,
     autoHideMenuBar: true,
     backgroundColor: '#171d2a',
-    icon: path.join(__dirname, 'assets', 'icon.png'),
+    icon: path.join(__dirname, 'assets', 'icon.ico'),
     webPreferences: {
       contextIsolation: true,
       nodeIntegration: false,
-      sandbox: true
+      sandbox: true,
+      preload: path.join(__dirname, 'preload.js')
     }
   });
 
@@ -47,6 +52,17 @@ function createWindow() {
   mainWindow.once('ready-to-show', () => {
     mainWindow.show();
     mainWindow.setFullScreen(true);
+  });
+
+  mainWindow.webContents.on('did-finish-load', () => {
+    void mainWindow.webContents.insertCSS(STEAM_UI_CSS);
+  });
+
+  mainWindow.webContents.on('before-input-event', (event, input) => {
+    if (input.type !== 'keyDown' || input.key !== 'Escape' || input.isAutoRepeat) return;
+
+    event.preventDefault();
+    mainWindow.webContents.send(SHOW_EXIT_DIALOG_CHANNEL);
   });
 
   mainWindow.webContents.setWindowOpenHandler(({ url }) => {
@@ -74,6 +90,13 @@ function createWindow() {
 }
 
 const hasSingleInstanceLock = app.requestSingleInstanceLock();
+
+ipcMain.on(EXIT_GAME_CHANNEL, (event) => {
+  if (!mainWindow || event.sender !== mainWindow.webContents) return;
+  if (!isAmongDemonsUrl(event.sender.getURL())) return;
+
+  app.quit();
+});
 
 if (!hasSingleInstanceLock) {
   app.quit();
