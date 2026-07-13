@@ -21,15 +21,13 @@ function createExitDialog() {
   modal.setAttribute('aria-hidden', 'true');
   modal.innerHTML = `
     <div class="steam-exit-backdrop" aria-hidden="true"></div>
-    <section class="steam-exit-panel" role="dialog" aria-modal="true" aria-labelledby="steamExitTitle" aria-describedby="steamExitDescription">
+    <section class="steam-exit-panel" role="dialog" aria-modal="true" aria-labelledby="steamExitTitle">
       <header class="steam-exit-header">
-        <span class="steam-exit-eyebrow">Steam Menu</span>
-        <h2 id="steamExitTitle">Exit Among Demons?</h2>
-        <p id="steamExitDescription">Are you sure you want to close the game?</p>
+        <h2 id="steamExitTitle">Do you really want to exit?</h2>
       </header>
       <footer class="steam-exit-actions">
+        <button type="button" class="btn btn-glass-danger steam-exit-button steam-exit-confirm">Exit</button>
         <button type="button" class="btn btn-glass-muted steam-exit-button steam-exit-continue">Continue</button>
-        <button type="button" class="btn btn-glass-danger steam-exit-button steam-exit-confirm">Exit Game</button>
       </footer>
     </section>
   `;
@@ -87,8 +85,8 @@ function hideExitDialog() {
 function keepFocusInsideDialog(event) {
   if (event.key !== 'Tab') return;
 
-  const firstButton = continueButton;
-  const lastButton = exitButton;
+  const firstButton = exitButton;
+  const lastButton = continueButton;
 
   if (event.shiftKey && document.activeElement === firstButton) {
     event.preventDefault();

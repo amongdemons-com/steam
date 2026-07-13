@@ -1,3 +1,15 @@
+html,
+body,
+* {
+  scrollbar-width: none;
+}
+
+::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+  display: none;
+}
+
 #among-demons-steam-exit[hidden] {
   display: none !important;
 }
@@ -25,7 +37,6 @@
   width: min(100%, 32rem);
   overflow: hidden;
   border: 1px solid var(--ad-border-strong, rgba(161, 212, 201, 0.28));
-  border-top: 4px solid var(--ad-ember, #e78a55);
   border-radius: var(--ad-radius, 6px);
   background:
     linear-gradient(180deg, rgba(255, 255, 255, 0.04), transparent 45%),
@@ -35,16 +46,7 @@
 
 #among-demons-steam-exit .steam-exit-header {
   padding: 1.5rem;
-}
-
-#among-demons-steam-exit .steam-exit-eyebrow {
-  display: block;
-  margin-bottom: 0.45rem;
-  color: var(--ad-gold, #e8c76a);
-  font-size: 0.72rem;
-  font-weight: 800;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
+  text-align: center;
 }
 
 #among-demons-steam-exit h2 {
@@ -56,16 +58,9 @@
   line-height: 1.1;
 }
 
-#among-demons-steam-exit p {
-  margin: 0.7rem 0 0;
-  color: var(--ad-muted, #9fb6b2);
-  font-size: 0.95rem;
-  line-height: 1.5;
-}
-
 #among-demons-steam-exit .steam-exit-actions {
   display: flex;
-  justify-content: flex-end;
+  justify-content: center;
   gap: 0.7rem;
   padding: 1rem 1.5rem;
   border-top: 1px solid var(--ad-border, rgba(161, 212, 201, 0.16));
