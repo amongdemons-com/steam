@@ -1,116 +1,102 @@
-const { app, BrowserWindow, protocol, shell } = require('electron');
+const { app, BrowserWindow, Menu, shell } = require('electron');
 const path = require('path');
-const fs = require('fs');
-const { fileURLToPath } = require('url');
 
-const isDev = process.argv.includes('--dev') || !app.isPackaged;
-const frontendDir = isDev
-  ? path.resolve(__dirname, '..', 'app')
-  : path.join(process.resourcesPath, 'frontend', 'app');
-const vendorDir = isDev
-  ? path.join(__dirname, 'node_modules', 'lucide', 'dist', 'umd')
-  : path.join(process.resourcesPath, 'frontend', 'vendor', 'lucide');
-const routeFiles = new Map([
-  ['/', 'index.html'],
-  ['/camp', 'camp.html'],
-  ['/collection', 'collection.html'],
-  ['/dungeon', 'dungeon.html'],
-  ['/login', 'login.html'],
-  ['/privacy', 'privacy.html'],
-  ['/rankings', 'rankings.html'],
-  ['/register', 'register.html'],
-  ['/terms', 'terms.html']
-]);
+const APP_URL = 'https://amongdemons.com/';
+const APP_HOST = new URL(APP_URL).hostname;
 
-app.whenReady().then(() => {
-  registerFileRoutes();
-  createWindow();
+let mainWindow = null;
 
-  app.on('activate', () => {
-    if (BrowserWindow.getAllWindows().length === 0) createWindow();
-  });
-});
+function isAmongDemonsUrl(value) {
+  try {
+    const url = new URL(value);
+    return url.protocol === 'https:'
+      && (url.hostname === APP_HOST || url.hostname.endsWith(`.${APP_HOST}`));
+  } catch {
+    return false;
+  }
+}
 
-app.on('window-all-closed', () => {
-  if (process.platform !== 'darwin') app.quit();
-});
+function openExternalUrl(value) {
+  try {
+    const url = new URL(value);
+    if (url.protocol === 'https:' || url.protocol === 'http:') {
+      void shell.openExternal(url.toString());
+    }
+  } catch {
+    // Ignore malformed URLs from page content.
+  }
+}
 
 function createWindow() {
-  const mainWindow = new BrowserWindow({
-    width: 1280,
-    height: 800,
-    minWidth: 960,
-    minHeight: 640,
-    backgroundColor: '#090909',
+  mainWindow = new BrowserWindow({
+    title: 'Among Demons',
+    show: false,
+    fullscreen: true,
+    autoHideMenuBar: true,
+    backgroundColor: '#171d2a',
+    icon: path.join(__dirname, 'assets', 'icon.png'),
     webPreferences: {
       contextIsolation: true,
       nodeIntegration: false,
-      preload: path.join(__dirname, 'preload.js')
+      sandbox: true
     }
   });
 
+  mainWindow.removeMenu();
+
+  mainWindow.once('ready-to-show', () => {
+    mainWindow.show();
+    mainWindow.setFullScreen(true);
+  });
+
   mainWindow.webContents.setWindowOpenHandler(({ url }) => {
-    shell.openExternal(url);
+    if (isAmongDemonsUrl(url)) {
+      void mainWindow.loadURL(url);
+    } else {
+      openExternalUrl(url);
+    }
+
     return { action: 'deny' };
   });
 
-  mainWindow.loadFile(path.join(frontendDir, 'index.html'));
-}
+  mainWindow.webContents.on('will-navigate', (event, url) => {
+    if (isAmongDemonsUrl(url)) return;
 
-function registerFileRoutes() {
-  protocol.interceptFileProtocol('file', (request, callback) => {
-    callback(resolveFileRequest(request.url));
+    event.preventDefault();
+    openExternalUrl(url);
   });
+
+  mainWindow.on('closed', () => {
+    mainWindow = null;
+  });
+
+  void mainWindow.loadURL(APP_URL);
 }
 
-function resolveFileRequest(requestUrl) {
-  const directPath = toFilePath(requestUrl);
-  if (directPath && fs.existsSync(directPath)) return directPath;
+const hasSingleInstanceLock = app.requestSingleInstanceLock();
 
-  const pathname = decodeURIComponent(new URL(requestUrl).pathname).replace(/\\/g, '/');
-  const normalizedRoute = normalizeRoute(pathname);
-  const routeFile = routeFiles.get(normalizedRoute);
-  if (routeFile) return path.join(frontendDir, routeFile);
+if (!hasSingleInstanceLock) {
+  app.quit();
+} else {
+  app.on('second-instance', () => {
+    if (!mainWindow) return;
 
-  const appPath = afterPathSegment(pathname, 'app');
-  if (appPath) return path.join(frontendDir, appPath);
+    if (mainWindow.isMinimized()) mainWindow.restore();
+    mainWindow.show();
+    mainWindow.focus();
+  });
 
-  const vendorPath = afterPathSegment(pathname, 'vendor');
-  if (vendorPath) return resolveVendorPath(vendorPath);
+  app.whenReady().then(() => {
+    app.setAppUserModelId('com.amongdemons.steam');
+    Menu.setApplicationMenu(null);
+    createWindow();
 
-  return directPath || path.join(frontendDir, 'index.html');
-}
+    app.on('activate', () => {
+      if (BrowserWindow.getAllWindows().length === 0) createWindow();
+    });
+  });
 
-function toFilePath(requestUrl) {
-  try {
-    return fileURLToPath(requestUrl);
-  } catch (error) {
-    return '';
-  }
-}
-
-function normalizeRoute(pathname) {
-  const withoutDrive = pathname.replace(/^\/[A-Za-z]:/, '');
-  const trimmed = withoutDrive.replace(/\/+$/, '') || '/';
-  if (routeFiles.has(trimmed)) return trimmed;
-
-  const firstSegment = `/${trimmed.split('/').filter(Boolean)[0] || ''}`;
-  return routeFiles.has(firstSegment) ? firstSegment : trimmed;
-}
-
-function afterPathSegment(pathname, segment) {
-  const normalized = pathname.replace(/\\/g, '/');
-  const marker = `/${segment}/`;
-  const index = normalized.toLowerCase().lastIndexOf(marker.toLowerCase());
-  return index >= 0 ? normalized.slice(index + marker.length) : '';
-}
-
-function resolveVendorPath(vendorPath) {
-  const normalized = vendorPath.replace(/\\/g, '/');
-  const lucidePrefix = 'lucide/';
-  if (normalized.toLowerCase().startsWith(lucidePrefix)) {
-    return path.join(vendorDir, normalized.slice(lucidePrefix.length));
-  }
-
-  return path.join(vendorDir, normalized);
+  app.on('window-all-closed', () => {
+    if (process.platform !== 'darwin') app.quit();
+  });
 }
