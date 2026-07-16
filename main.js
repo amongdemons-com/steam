@@ -11,19 +11,16 @@ const GET_AUTH_TICKET_CHANNEL = 'steam:get-auth-ticket';
 const UNLOCK_ACHIEVEMENT_CHANNEL = 'steam:unlock-achievement';
 const SHOW_LOADER_CHANNEL = 'steam:show-loader';
 const HIDE_LOADER_CHANNEL = 'steam:hide-loader';
+const RELOAD_GAME_CHANNEL = 'steam:reload-game';
 const STEAM_UI_CSS = fs.readFileSync(path.join(__dirname, 'steam-ui.css'), 'utf8');
 
-// TODO: replace with the real Among Demons app id once Steamworks verification
-// completes. 480 is Spacewar, Valve's public test app.
-const STEAM_APP_ID = 480;
+const STEAM_APP_ID = 4973450;
 // Identity label echoed by the backend when validating tickets with
 // ISteamUserAuth/AuthenticateUserTicket.
 const AUTH_TICKET_IDENTITY = 'amongdemons';
 // Only these API names may be unlocked from the page. Mirrors
-// public/api/data/achievements.json in the website repo (steamName fields);
-// ACH_WIN_ONE_GAME is kept for Spacewar (app 480) testing.
+// public/api/data/achievements.json in the website repo (steamName fields).
 const ACHIEVEMENT_NAMES = new Set([
-  'ACH_WIN_ONE_GAME',
   'ACH_MARKED_BY_THE_DARK',
   'ACH_BLOODED_HUNTER',
   'ACH_VETERAN_OF_ASH',
@@ -134,6 +131,10 @@ function createWindow() {
 
   mainWindow.webContents.on('did-finish-load', () => {
     void mainWindow.webContents.insertCSS(STEAM_UI_CSS);
+    // The show-loader message races fast navigations: it can land on the NEW
+    // document (which then keeps the overlay forever), so always hide once a
+    // load completes.
+    mainWindow.webContents.send(HIDE_LOADER_CHANNEL);
   });
 
   // Show a loading overlay on the current page while the next document is
@@ -152,7 +153,17 @@ function createWindow() {
   });
 
   mainWindow.webContents.on('before-input-event', (event, input) => {
-    if (input.type !== 'keyDown' || input.key !== 'Escape' || input.isAutoRepeat) return;
+    if (input.type !== 'keyDown' || input.isAutoRepeat) return;
+
+    // Handled in the main process so it works even when the page's own
+    // JavaScript is hung and in-page UI can no longer respond.
+    if (input.key === 'F5' || (input.control && input.key.toLowerCase() === 'r')) {
+      event.preventDefault();
+      mainWindow.webContents.reloadIgnoringCache();
+      return;
+    }
+
+    if (input.key !== 'Escape') return;
 
     event.preventDefault();
     mainWindow.webContents.send(SHOW_EXIT_DIALOG_CHANNEL);
@@ -195,6 +206,12 @@ ipcMain.on(EXIT_GAME_CHANNEL, (event) => {
   if (!isTrustedGameSender(event)) return;
 
   app.quit();
+});
+
+ipcMain.on(RELOAD_GAME_CHANNEL, (event) => {
+  if (!isTrustedGameSender(event)) return;
+
+  mainWindow.webContents.reloadIgnoringCache();
 });
 
 ipcMain.handle(GET_AUTH_TICKET_CHANNEL, async (event) => {

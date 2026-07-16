@@ -6,3 +6,5 @@ out/
 
 # Local files
 *.log
+.env
+/steam-build
