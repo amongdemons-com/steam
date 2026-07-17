@@ -12,10 +12,28 @@ body,
 
 /* Steam players are signed in through their Steam session; logging out inside
    the wrapper would only strand them on the login page. The !important also
-   wins over icons.js toggling d-none on this button. */
+   wins over icons.js toggling d-none on this button. The .steam-nav-exit
+   exception is the wrapper-only exit button steam.js puts in the same spot. */
 #logoutBtn,
-.nav-logout-btn {
+.nav-logout-btn:not(.steam-nav-exit) {
   display: none !important;
+}
+
+/* The navbar exit button borrows .nav-logout-btn for its square sizing and
+   placement, but swaps the logout button's danger-red scheme for the site's
+   secondary button tokens. */
+body .game-shell-nav .steam-nav-exit.nav-logout-btn {
+  border-color: var(--secondary-border);
+  background: var(--secondary-bg);
+  color: var(--secondary-text);
+  box-shadow: none;
+}
+
+body .game-shell-nav .steam-nav-exit.nav-logout-btn:hover,
+body .game-shell-nav .steam-nav-exit.nav-logout-btn:focus-visible {
+  border-color: var(--secondary-hover-border);
+  background: var(--secondary-hover-bg);
+  color: var(--secondary-hover-text);
 }
 
 #among-demons-steam-loader[hidden] {

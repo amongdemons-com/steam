@@ -13,7 +13,10 @@ const LOADER_ID = 'among-demons-steam-loader';
 contextBridge.exposeInMainWorld('steamBridge', {
   isSteam: true,
   getAuthTicket: () => ipcRenderer.invoke(GET_AUTH_TICKET_CHANNEL),
-  unlockAchievement: (name) => ipcRenderer.invoke(UNLOCK_ACHIEVEMENT_CHANNEL, String(name))
+  unlockAchievement: (name) => ipcRenderer.invoke(UNLOCK_ACHIEVEMENT_CHANNEL, String(name)),
+  // Opens the same Escape confirm dialog; used by the website's wrapper-only
+  // exit button in the navbar.
+  requestExit: () => showExitDialog()
 });
 
 let modal = null;
