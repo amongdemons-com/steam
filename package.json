@@ -1,6 +1,6 @@
 {
   "name": "among-demons",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "private": true,
   "description": "Fullscreen desktop app for Among Demons.",
   "main": "main.js",

@@ -24,6 +24,7 @@ let panel = null;
 let continueButton = null;
 let exitButton = null;
 let reloadButton = null;
+let reloadResetTimer = null;
 let lastFocusedElement = null;
 let previousBodyOverflow = '';
 let showWhenReady = false;
@@ -67,7 +68,13 @@ function createExitDialog() {
     ipcRenderer.send(EXIT_GAME_CHANNEL);
   });
   reloadButton.addEventListener('click', () => {
+    // Disable only against double-clicks: if the reload fails this document
+    // stays alive, so the button must come back for another attempt.
     reloadButton.disabled = true;
+    clearTimeout(reloadResetTimer);
+    reloadResetTimer = setTimeout(() => {
+      reloadButton.disabled = false;
+    }, 5000);
     ipcRenderer.send(RELOAD_GAME_CHANNEL);
   });
   modal.addEventListener('keydown', keepFocusInsideDialog);
@@ -130,27 +137,54 @@ function keepFocusInsideDialog(event) {
 }
 
 let loader = null;
+let loaderText = null;
+let loaderSafetyTimer = null;
 
-function showLoader() {
+function showLoader(options) {
   if (!document.body) return;
 
   if (!loader) {
     loader = document.createElement('div');
     loader.id = LOADER_ID;
     loader.setAttribute('aria-hidden', 'true');
-    loader.innerHTML = '<div class="steam-loader-spinner"></div>';
+    loader.innerHTML =
+      '<div class="steam-loader-inner">'
+      + '<div class="steam-loader-spinner"></div>'
+      + '<div class="steam-loader-text">Waiting for server ...</div>'
+      + '</div>';
+    loaderText = loader.querySelector('.steam-loader-text');
     document.body.appendChild(loader);
   }
 
+  // "Waiting" mode is used on server-error documents (e.g. a CDN 429): the
+  // page behind the overlay is empty, so tell the player what is happening
+  // while the wrapper retries in the background.
+  const waiting = Boolean(options && options.waiting);
+  loaderText.hidden = !waiting;
   loader.hidden = false;
+
+  // Safety valve: a navigation that stalls without ever failing sends no
+  // hide message, and the overlay must not blind a real page forever. Error
+  // documents have nothing to blind, and each retry re-shows the overlay, so
+  // waiting mode can stay up much longer.
+  clearTimeout(loaderSafetyTimer);
+  loaderSafetyTimer = setTimeout(hideLoader, waiting ? 45000 : 12000);
 }
 
 function hideLoader() {
+  clearTimeout(loaderSafetyTimer);
   if (loader) loader.hidden = true;
+
+  // Hide-loader on a still-alive document means a navigation failed; re-arm
+  // the reload button right away instead of waiting out its cooldown.
+  if (reloadButton) {
+    clearTimeout(reloadResetTimer);
+    reloadButton.disabled = false;
+  }
 }
 
 ipcRenderer.on(SHOW_EXIT_DIALOG_CHANNEL, showExitDialog);
-ipcRenderer.on(SHOW_LOADER_CHANNEL, showLoader);
+ipcRenderer.on(SHOW_LOADER_CHANNEL, (event, options) => showLoader(options));
 ipcRenderer.on(HIDE_LOADER_CHANNEL, hideLoader);
 
 if (document.readyState === 'loading') {

@@ -54,6 +54,25 @@ body .game-shell-nav .steam-nav-exit.nav-logout-btn:focus-visible {
   animation: steam-loader-fade 0.2s ease-out 0.25s forwards;
 }
 
+#among-demons-steam-loader .steam-loader-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.1rem;
+}
+
+#among-demons-steam-loader .steam-loader-text {
+  color: rgba(237, 245, 242, 0.82);
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 0.95rem;
+  letter-spacing: 0.04em;
+  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.9);
+}
+
+#among-demons-steam-loader .steam-loader-text[hidden] {
+  display: none;
+}
+
 #among-demons-steam-loader .steam-loader-spinner {
   width: 3rem;
   height: 3rem;
@@ -144,9 +163,70 @@ body .game-shell-nav .steam-nav-exit.nav-logout-btn:focus-visible {
   font-weight: 700;
 }
 
-/* Colors and hover/focus states come from the site's own .btn-primary /
-   .btn-secondary styles in base.css so the dialog always matches the website;
-   only layout is defined here. */
+/* Fully self-contained button styling: the dialog must look native even on a
+   document with no site CSS at all (the CDN answers over-limit navigations
+   with an empty 429 page). Values are copied from base.css tokens; the var()
+   indirection keeps them in sync with the live theme on healthy pages. */
+#among-demons-steam-exit .steam-exit-button {
+  appearance: none;
+  -webkit-appearance: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  padding: 0.45rem 1rem;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 1rem;
+  line-height: 1.4;
+  cursor: pointer;
+  user-select: none;
+  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.96);
+  transition:
+    background 140ms ease,
+    border-color 140ms ease,
+    color 140ms ease,
+    opacity 140ms ease;
+}
+
+#among-demons-steam-exit .steam-exit-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.65;
+}
+
+#among-demons-steam-exit .steam-exit-continue,
+#among-demons-steam-exit .steam-exit-reload {
+  border: 1px solid var(--secondary-border, rgba(161, 212, 201, 0.2));
+  background: var(--secondary-bg, rgba(8, 18, 21, 0.72));
+  color: var(--secondary-text, rgba(237, 245, 242, 0.82));
+}
+
+#among-demons-steam-exit .steam-exit-continue:hover,
+#among-demons-steam-exit .steam-exit-continue:focus-visible,
+#among-demons-steam-exit .steam-exit-reload:not(:disabled):hover,
+#among-demons-steam-exit .steam-exit-reload:focus-visible {
+  border-color: var(--secondary-hover-border, rgba(111, 214, 189, 0.5));
+  background: var(--secondary-hover-bg, rgba(111, 214, 189, 0.1));
+  color: var(--secondary-hover-text, #effffc);
+}
+
+#among-demons-steam-exit .steam-exit-confirm {
+  border: 1px solid var(--primary-frame, #a98549);
+  border-radius: var(--primary-radius, 0);
+  background: var(--primary-gradient, linear-gradient(180deg, #5b4120, #332718));
+  color: var(--primary-label, #cdbe91);
+  box-shadow:
+    var(--primary-shadow,
+      0 0 0 1px rgba(3, 11, 21, 0.96),
+      0 2px 4px rgba(0, 0, 0, 0.5));
+}
+
+#among-demons-steam-exit .steam-exit-confirm:not(:disabled):hover,
+#among-demons-steam-exit .steam-exit-confirm:focus-visible {
+  border-color: var(--primary-hover-border, #b99758);
+  background: var(--primary-hover-gradient, linear-gradient(180deg, #684d27, #40301a));
+  color: var(--primary-label-hover, #e2d5a9);
+}
+
 #among-demons-steam-exit .steam-exit-reload {
   min-width: 2.65rem;
   width: 2.65rem;
