@@ -210,6 +210,12 @@ try {
   console.warn('Steamworks unavailable:', error.message);
 }
 
+// Electron normally renders in a separate GPU process and may stop repainting
+// when the page is visually idle. Steam's overlay cannot hook that rendering
+// path reliably, so keep Chromium's GPU work in this process and invalidate the
+// window each frame. This must run before the first BrowserWindow is created.
+steamworks.electronEnableSteamOverlay();
+
 function isAmongDemonsUrl(value) {
   try {
     const url = new URL(value);

@@ -27,6 +27,11 @@ The wrapper connects to the running Steam client via [steamworks.js](https://git
 
 If Steam is not running (or the app is launched outside Steam), the wrapper still works — the bridge calls just return `null`/`false`.
 
+The wrapper also enables steamworks.js's Electron overlay compatibility mode
+before creating its window. This keeps Chromium's GPU rendering hookable and
+forces continuous frame invalidation so Shift+Tab works even when the page is
+visually idle.
+
 ### Development
 
 `steam_appid.txt` in the project root tells the SDK which app to impersonate during `npm start`. It currently contains `480` (Spacewar, Valve's public test app). Once the real Among Demons app id exists, update both this file and `STEAM_APP_ID` in `main.js`, and replace the placeholder achievement whitelist.
