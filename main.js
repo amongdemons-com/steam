@@ -1,4 +1,4 @@
-const { app, BrowserWindow, Menu, ipcMain, session, shell } = require('electron');
+const { app, BrowserWindow, Menu, ipcMain, session, shell, screen } = require('electron');
 const fs = require('fs');
 const path = require('path');
 const steamworks = require('steamworks.js');
@@ -238,10 +238,20 @@ function openExternalUrl(value) {
 }
 
 function createWindow() {
+  const display = screen.getDisplayNearestPoint(screen.getCursorScreenPoint());
+
   mainWindow = new BrowserWindow({
     title: 'Among Demons',
     show: false,
-    fullscreen: true,
+    // Native fullscreen leaves duplicate/ghost entries in the Windows 11
+    // Alt+Tab switcher on affected builds. A frameless full-display window keeps
+    // the game borderless while staying on the normal windowed compositor path.
+    fullscreen: false,
+    fullscreenable: false,
+    frame: false,
+    thickFrame: false,
+    resizable: false,
+    ...display.bounds,
     autoHideMenuBar: true,
     backgroundColor: '#171d2a',
     icon: path.join(__dirname, 'assets', 'icon.ico'),
@@ -256,8 +266,20 @@ function createWindow() {
   mainWindow.removeMenu();
 
   mainWindow.once('ready-to-show', () => {
+    // A normal window stays below the Windows taskbar. Raise the game just
+    // above it while focused, then immediately yield when the player tabs out.
+    mainWindow.setAlwaysOnTop(true, 'pop-up-menu');
     mainWindow.show();
-    mainWindow.setFullScreen(true);
+  });
+
+  mainWindow.on('focus', () => {
+    const activeDisplay = screen.getDisplayMatching(mainWindow.getBounds());
+    mainWindow.setBounds(activeDisplay.bounds);
+    mainWindow.setAlwaysOnTop(true, 'pop-up-menu');
+  });
+
+  mainWindow.on('blur', () => {
+    mainWindow.setAlwaysOnTop(false);
   });
 
   mainWindow.webContents.on('did-finish-load', () => {
@@ -337,6 +359,13 @@ function createWindow() {
 
   mainWindow.webContents.on('before-input-event', (event, input) => {
     if (input.type !== 'keyDown' || input.isAutoRepeat) return;
+
+    // Do not let F11 put the borderless window back onto the Windows native
+    // fullscreen path that produces ghost Alt+Tab entries.
+    if (input.key === 'F11') {
+      event.preventDefault();
+      return;
+    }
 
     // Handled in the main process so it works even when the page's own
     // JavaScript is hung and in-page UI can no longer respond.

@@ -1,6 +1,13 @@
 # Among Demons
 
-A minimal Electron app that opens [amongdemons.com/camp](https://amongdemons.com/camp) in a fullscreen desktop window. Press Escape to open the Steam-only exit confirmation.
+A minimal Electron app that opens [amongdemons.com/camp](https://amongdemons.com/camp) in a borderless full-display desktop window. Press Escape to open the Steam-only exit confirmation.
+
+The Windows wrapper deliberately uses borderless windowed mode instead of
+native fullscreen. Affected Windows 11 builds can leave a new ghost thumbnail
+in the Alt+Tab switcher each time a Chromium/Electron fullscreen window loses
+focus. A frameless window covers the full display and is raised above the
+taskbar only while focused, preserving the game presentation without triggering
+that compositor bug or blocking other applications after Alt+Tab.
 
 ## Run locally
 
